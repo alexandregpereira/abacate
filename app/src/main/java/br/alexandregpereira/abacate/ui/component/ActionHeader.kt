@@ -12,6 +12,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -38,11 +41,15 @@ fun ActionHeader(
             .padding(all = 16.dp)
             .defaultMinSize(minHeight = 40.dp)
             .fillMaxWidth()
+            .semantics { testTag = "ActionHeader" }
     ) {
-        OvalImages(
-            urls = urls,
-            opened = opened
-        )
+
+        if (urls.isNotEmpty()) {
+            OvalImages(
+                urls = urls,
+                opened = opened,
+            )
+        }
 
         val textPaddingStart = if (urls.isEmpty()) 0.dp else 16.dp
         AnimatedVisibility(
@@ -96,7 +103,7 @@ fun OvalImages(
         }
     }
 
-    Box {
+    Box(modifier = Modifier.semantics { contentDescription = "OvalImages" }) {
         val maxImages = if (urls.size > MAX_IMAGES) MAX_IMAGES else urls.size
         var startPadding = 0.dp
         urls.subList(0, maxImages).forEachIndexed { index, url ->
@@ -127,6 +134,7 @@ fun OvalImage(
             .clip(shape = CircleShape)
             .background(color = GrayScale100)
             .border(width = 4.dp, color = White, shape = CircleShape)
+            .semantics { testTag = "OvalImage" }
     )
 }
 
