@@ -4,15 +4,18 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
@@ -24,7 +27,7 @@ import br.alexandregpereira.abacate.ui.theme.White
 import dev.chrisbanes.accompanist.coil.CoilImage
 
 const val IMAGE_URL_DEFAULT = "https://picsum.photos/300/300"
-private const val MAX_IMAGES = 6
+private const val MAX_IMAGES = 5
 
 @ExperimentalAnimationApi
 @Composable
@@ -34,31 +37,41 @@ fun ActionHeader(
     urls: List<String> = emptyList()
 ) {
     var opened by remember { mutableStateOf(false) }
-    val rowModifier = Modifier.clickable(enabled = urls.size > 2) {
-        opened = opened.not()
-    }
+    val rowModifier = Modifier
+        .then(modifier)
+        .height(height = 40.dp)
+        .fillMaxWidth()
+        .semantics { testTag = "ActionHeader" }
+        .run {
+            if (opened) {
+                horizontalScroll(rememberScrollState())
+            } else {
+                this
+            }
+        }
     Row(
         modifier = rowModifier
-            .then(modifier)
-            .defaultMinSize(minHeight = 40.dp)
-            .fillMaxWidth()
-            .semantics { testTag = "ActionHeader" }
     ) {
 
         if (urls.isNotEmpty()) {
+            val onTap: (Offset) -> Unit = {
+                opened = opened.not()
+            }
             OvalImages(
                 urls = urls,
                 opened = opened,
+                onTap = onTap,
+                modifier = Modifier.align(Alignment.CenterVertically)
             )
         }
 
-        val textPaddingStart = if (urls.isEmpty()) 0.dp else 16.dp
+        val textPaddingStart = if (urls.isEmpty()) 16.dp else 0.dp
         AnimatedVisibility(
             visible = !opened,
             enter = fadeIn(),
             exit = fadeOut() + slideOutHorizontally(targetOffsetX = { -it }),
             modifier = Modifier
-                .padding(start = textPaddingStart)
+                .padding(start = textPaddingStart, end = 16.dp)
                 .align(Alignment.CenterVertically)
         ) {
             Text(
@@ -71,24 +84,13 @@ fun ActionHeader(
 
 @Composable
 fun OvalImages(
-    urls: List<String> = emptyList(),
-    opened: Boolean = false
+    urls: List<String>,
+    opened: Boolean,
+    onTap: (Offset) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val transition = updateTransition(targetState = opened)
-    val secondPaddingIncrease by transition.animateDp(
-        transitionSpec = {
-            if (targetState) {
-                spring(
-                    visibilityThreshold = Dp.VisibilityThreshold
-                )
-            } else {
-                spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    visibilityThreshold = Dp.VisibilityThreshold
-                )
-            }
-        }
-    ) { stateOpened ->
+    val paddingTransition = updateTransition(targetState = opened)
+    val secondPaddingIncrease by paddingTransition.animatePaddingDp { stateOpened ->
         if (stateOpened) {
             48.dp
         } else {
@@ -96,39 +98,43 @@ fun OvalImages(
         }
     }
 
-    val thirdAndMorePaddingIncrease by transition.animateDp(
-        transitionSpec = {
-            if (targetState) {
-                spring(
-                    visibilityThreshold = Dp.VisibilityThreshold
-                )
-            } else {
-                spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    visibilityThreshold = Dp.VisibilityThreshold
-                )
-            }
-        }
-    ) { stateOpened ->
-        if (stateOpened) {
-            48.dp
-        } else {
-            4.dp
-        }
+    val thirdAndMorePaddingIncrease by paddingTransition.animatePaddingDp { stateOpened ->
+        if (stateOpened) 48.dp else 4.dp
     }
 
-    Box(modifier = Modifier.semantics { contentDescription = "OvalImages" }) {
-        val maxImages = if (urls.size > MAX_IMAGES) MAX_IMAGES else urls.size
-        var startPadding = 0.dp
-        urls.subList(0, maxImages).forEachIndexed { index, url ->
+    var pressed by remember { mutableStateOf(false) }
+    val pressedTransition = updateTransition(targetState = pressed)
+    val scale by pressedTransition.animatePressed { statePressed ->
+        if (statePressed) 0.85f else 1f
+    }
+
+    val boxModifier = Modifier.then(modifier).run {
+        if (urls.size > 2) {
+            pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = onTap,
+                    onPress = {
+                        pressed = true
+                        tryAwaitRelease()
+                        pressed = false
+                    }
+                )
+            }
+        } else {
+            this
+        }
+    }.height(height = (40 * scale).dp)
+    Box(boxModifier) {
+        var startPadding = 16.dp
+        urls.forEachIndexed { index, url ->
             OvalImage(
                 url,
-                modifier = Modifier.padding(start = startPadding)
+                modifier = Modifier.padding(start = startPadding, end = 16.dp)
             )
-            startPadding += if (index == 0) {
-                secondPaddingIncrease
-            } else {
-                thirdAndMorePaddingIncrease
+            startPadding += when {
+                index == 0 -> secondPaddingIncrease
+                index in MAX_IMAGES..urls.size && opened.not() -> 0.dp
+                else -> thirdAndMorePaddingIncrease
             }
         }
     }
@@ -152,8 +158,46 @@ fun OvalImage(
     )
 }
 
+@Composable
+private fun Transition<Boolean>.animatePaddingDp(
+    targetValueByState: @Composable (Boolean) -> Dp
+) = animateDp(
+    transitionSpec = {
+        if (targetState) {
+            spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                visibilityThreshold = Dp.VisibilityThreshold
+            )
+        } else {
+            spring(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                visibilityThreshold = Dp.VisibilityThreshold
+            )
+        }
+    },
+    targetValueByState = targetValueByState
+)
+
+@Composable
+private fun Transition<Boolean>.animatePressed(
+    targetValueByState: @Composable (Boolean) -> Float
+) = animateFloat(
+    transitionSpec = {
+        if (targetState) {
+            spring(
+                stiffness = 100f
+            )
+        } else {
+            spring(
+                stiffness = Spring.StiffnessLow,
+            )
+        }
+    },
+    targetValueByState = targetValueByState
+)
+
 @ExperimentalAnimationApi
-@Preview
+@Preview(backgroundColor = 0xFFFFFFFF)
 @Composable
 fun ActionHeaderPreview0() {
     AbacateTheme {

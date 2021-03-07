@@ -22,10 +22,10 @@ fun AbacateCard(
             ActionHeader(
                 text = actionHeaderText,
                 urls = actionHeaderUrls,
-                modifier = Modifier.padding(all = 16.dp)
+                modifier = Modifier.padding(vertical = 16.dp)
             )
             PostText(
-                text = LoremIpsum(50).values.first(),
+                text = LoremIpsum((2..50).random()).values.first(),
                 modifier = Modifier.padding(horizontal = 16.dp)
                     .padding(bottom = 16.dp)
             )
