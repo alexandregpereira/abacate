@@ -30,6 +30,7 @@ private const val MAX_IMAGES = 6
 @Composable
 fun ActionHeader(
     text: String,
+    modifier: Modifier = Modifier,
     urls: List<String> = emptyList()
 ) {
     var opened by remember { mutableStateOf(false) }
@@ -38,7 +39,7 @@ fun ActionHeader(
     }
     Row(
         modifier = rowModifier
-            .padding(all = 16.dp)
+            .then(modifier)
             .defaultMinSize(minHeight = 40.dp)
             .fillMaxWidth()
             .semantics { testTag = "ActionHeader" }
