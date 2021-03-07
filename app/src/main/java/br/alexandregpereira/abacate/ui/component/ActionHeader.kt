@@ -74,7 +74,20 @@ fun OvalImages(
     opened: Boolean = false
 ) {
     val transition = updateTransition(targetState = opened)
-    val secondPaddingIncrease by transition.animateDp { stateOpened ->
+    val secondPaddingIncrease by transition.animateDp(
+        transitionSpec = {
+            if (targetState) {
+                spring(
+                    visibilityThreshold = Dp.VisibilityThreshold
+                )
+            } else {
+                spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    visibilityThreshold = Dp.VisibilityThreshold
+                )
+            }
+        }
+    ) { stateOpened ->
         if (stateOpened) {
             48.dp
         } else {
