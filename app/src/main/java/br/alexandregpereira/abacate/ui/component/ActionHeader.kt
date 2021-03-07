@@ -26,7 +26,7 @@ import br.alexandregpereira.abacate.ui.theme.GrayScale100
 import br.alexandregpereira.abacate.ui.theme.White
 import dev.chrisbanes.accompanist.coil.CoilImage
 
-const val IMAGE_URL_DEFAULT = "https://picsum.photos/300/300"
+const val IMAGE_URL_DEFAULT = ""
 private const val MAX_IMAGES = 5
 
 @ExperimentalAnimationApi
@@ -170,7 +170,7 @@ private fun Transition<Boolean>.animatePaddingDp(
             )
         } else {
             spring(
-                dampingRatio = Spring.DampingRatioLowBouncy,
+                dampingRatio = Spring.DampingRatioMediumBouncy,
                 visibilityThreshold = Dp.VisibilityThreshold
             )
         }

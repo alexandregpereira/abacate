@@ -7,7 +7,6 @@ import androidx.compose.material.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import br.alexandregpereira.abacate.ui.theme.AbacateTheme
 
@@ -15,9 +14,11 @@ import br.alexandregpereira.abacate.ui.theme.AbacateTheme
 @Composable
 fun AbacateCard(
     actionHeaderText: String,
-    actionHeaderUrls: List<String> = emptyList()
+    actionHeaderUrls: List<String>,
+    postText: String,
+    modifier: Modifier = Modifier,
 ) {
-    Card(Modifier.padding(all = 8.dp)) {
+    Card(modifier.padding(all = 8.dp)) {
         Column {
             ActionHeader(
                 text = actionHeaderText,
@@ -25,7 +26,7 @@ fun AbacateCard(
                 modifier = Modifier.padding(vertical = 16.dp)
             )
             PostText(
-                text = LoremIpsum((2..50).random()).values.first(),
+                text = postText,
                 modifier = Modifier.padding(horizontal = 16.dp)
                     .padding(bottom = 16.dp)
             )
@@ -40,7 +41,8 @@ fun AbacateCardPreview() {
     AbacateTheme {
         AbacateCard(
             actionHeaderText = "Anything asdsa asdasd asd asd asdasd as das dsa sa das",
-            actionHeaderUrls = (0..10).map { IMAGE_URL_DEFAULT }
+            actionHeaderUrls = (0..10).map { IMAGE_URL_DEFAULT },
+            postText = "Aasdas asd asd asdasdasdas asddasdasd"
         )
     }
 }
