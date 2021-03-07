@@ -30,7 +30,7 @@ fun ActionHeader(
     urls: List<String> = emptyList()
 ) {
     var opened by remember { mutableStateOf(false) }
-    val rowModifier = Modifier.clickable(enabled = true) {
+    val rowModifier = Modifier.clickable(enabled = urls.size > 2) {
         opened = opened.not()
     }
     Row(
