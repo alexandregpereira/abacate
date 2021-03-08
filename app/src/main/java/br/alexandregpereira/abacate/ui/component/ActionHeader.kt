@@ -103,32 +103,19 @@ fun OvalImages(
     }
 
     var pressed by remember { mutableStateOf(false) }
-    val pressedTransition = updateTransition(targetState = pressed)
-    val scale by pressedTransition.animatePressed { statePressed ->
-        if (statePressed) 0.85f else 1f
-    }
-
-    val boxModifier = Modifier.then(modifier).run {
-        if (urls.size > 2) {
-            pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = onTap,
-                    onPress = {
-                        pressed = true
-                        tryAwaitRelease()
-                        pressed = false
-                    }
-                )
-            }
-        } else {
-            this
-        }
-    }.height(height = (40 * scale).dp)
+    val boxModifier = Modifier
+        .then(modifier)
+        .pressedGesture(
+            enabled = urls.size > 2,
+            onTap = onTap,
+            onPressed = { pressed = it }
+        )
     Box(boxModifier) {
         var startPadding = 16.dp
         urls.forEachIndexed { index, url ->
             OvalImage(
                 url,
+                pressed = pressed,
                 modifier = Modifier.padding(start = startPadding, end = 16.dp)
             )
             startPadding += when {
@@ -143,14 +130,16 @@ fun OvalImages(
 @Composable
 fun OvalImage(
     url: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    pressed: Boolean = false
 ) {
+    val scale = animatePressed(pressed = pressed)
     CoilImage(
         data = url,
         contentDescription = "My content description",
         fadeIn = true,
         modifier = modifier
-            .size(40.dp)
+            .size((40 * scale).dp)
             .clip(shape = CircleShape)
             .background(color = GrayScale100)
             .border(width = 4.dp, color = White, shape = CircleShape)
@@ -179,22 +168,42 @@ private fun Transition<Boolean>.animatePaddingDp(
 )
 
 @Composable
-private fun Transition<Boolean>.animatePressed(
-    targetValueByState: @Composable (Boolean) -> Float
-) = animateFloat(
-    transitionSpec = {
-        if (targetState) {
-            spring(
-                stiffness = 100f
-            )
+private fun animatePressed(
+    pressed: Boolean
+): Float {
+    val animationSpec: AnimationSpec<Float> = if (pressed) {
+        spring(stiffness = 200f)
+    } else {
+        spring(stiffness = 500f)
+    }
+    return animateFloatAsState(
+        targetValue = if (pressed) 0.85f else 1f,
+        animationSpec = animationSpec
+    ).value
+}
+
+private fun Modifier.pressedGesture(
+    enabled: Boolean = true,
+    onTap: (Offset) -> Unit,
+    onPressed: (Boolean) -> Unit
+): Modifier {
+    return this.run {
+        if (enabled) {
+            pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = onTap,
+                    onPress = {
+                        onPressed(true)
+                        tryAwaitRelease()
+                        onPressed(false)
+                    }
+                )
+            }
         } else {
-            spring(
-                stiffness = Spring.StiffnessLow,
-            )
+            this
         }
-    },
-    targetValueByState = targetValueByState
-)
+    }
+}
 
 @ExperimentalAnimationApi
 @Preview(backgroundColor = 0xFFFFFFFF)
