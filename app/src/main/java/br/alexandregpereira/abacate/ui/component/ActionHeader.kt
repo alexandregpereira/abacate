@@ -4,7 +4,6 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -15,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
@@ -166,44 +164,6 @@ private fun Transition<Boolean>.animatePaddingDp(
     },
     targetValueByState = targetValueByState
 )
-
-@Composable
-private fun animatePressed(
-    pressed: Boolean
-): Float {
-    val animationSpec: AnimationSpec<Float> = if (pressed) {
-        spring(stiffness = 200f)
-    } else {
-        spring(stiffness = 500f)
-    }
-    return animateFloatAsState(
-        targetValue = if (pressed) 0.85f else 1f,
-        animationSpec = animationSpec
-    ).value
-}
-
-private fun Modifier.pressedGesture(
-    enabled: Boolean = true,
-    onTap: (Offset) -> Unit,
-    onPressed: (Boolean) -> Unit
-): Modifier {
-    return this.run {
-        if (enabled) {
-            pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = onTap,
-                    onPress = {
-                        onPressed(true)
-                        tryAwaitRelease()
-                        onPressed(false)
-                    }
-                )
-            }
-        } else {
-            this
-        }
-    }
-}
 
 @ExperimentalAnimationApi
 @Preview(backgroundColor = 0xFFFFFFFF)

@@ -4,8 +4,11 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Card
-import androidx.compose.runtime.Composable
+import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import br.alexandregpereira.abacate.ui.theme.AbacateTheme
@@ -18,7 +21,21 @@ fun AbacateCard(
     postText: String,
     modifier: Modifier = Modifier,
 ) {
-    Card(modifier.padding(all = 8.dp)) {
+    var pressed by remember { mutableStateOf(false) }
+    val scale = animatePressed(pressed = pressed, pressedScale = 0.96f)
+    val cardModifier = modifier
+        .padding(all = 8.dp)
+        .graphicsLayer(
+            scaleX = scale,
+            scaleY = scale
+        )
+        .clip(MaterialTheme.shapes.medium)
+        .pressedGesture(
+            rippleEffectEnabled = true,
+            onTap = {},
+            onPressed = { pressed = it }
+        )
+    Card(cardModifier) {
         Column {
             ActionHeader(
                 text = actionHeaderText,
@@ -27,7 +44,8 @@ fun AbacateCard(
             )
             PostText(
                 text = postText,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
                     .padding(bottom = 16.dp)
             )
         }
