@@ -8,6 +8,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -64,18 +65,45 @@ fun ActionHeader(
         }
 
         val textPaddingStart = if (urls.isEmpty()) 16.dp else 0.dp
-        AnimatedVisibility(
+        TextVisibility(
+            text = text,
             visible = !opened,
-            enter = fadeIn(),
-            exit = fadeOut() + slideOutHorizontally(targetOffsetX = { -it }),
             modifier = Modifier
                 .padding(start = textPaddingStart, end = 16.dp)
                 .align(Alignment.CenterVertically)
-        ) {
-            Text(
-                text = text,
-                maxLines = 2
-            )
+        )
+    }
+}
+
+@ExperimentalAnimationApi
+@Composable
+fun TextVisibility(
+    text: String,
+    visible: Boolean,
+    modifier: Modifier = Modifier
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = slideInHorizontally(initialOffsetX = { it * 3 }),
+        exit = slideOutHorizontally(targetOffsetX = { it * 3 }),
+        modifier = modifier
+    ) {
+        Text(
+            text = text,
+            maxLines = 2
+        )
+    }
+}
+
+@ExperimentalAnimationApi
+@Preview(backgroundColor = 0xFFFFFFFF)
+@Composable
+fun TextVisibilityPreview() {
+    AbacateTheme(darkTheme = true) {
+        var visible by remember { mutableStateOf(true) }
+        TextVisibility("teste", visible)
+        Button(onClick = { visible = !visible }, modifier = Modifier.padding(top = 24.dp)) {
+            Text(text = "Click")
         }
     }
 }
@@ -213,7 +241,7 @@ fun ActionHeaderPreview3() {
 }
 
 @ExperimentalAnimationApi
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun ActionHeaderPreview6() {
     AbacateTheme {

@@ -1,10 +1,10 @@
-package br.alexandregpereira.abacate
+package br.alexandregpereira.abacate.ui.component
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import br.alexandregpereira.abacate.ui.component.ActionHeader
+import br.alexandregpereira.abacate.presentation.MainActivity
 import br.alexandregpereira.abacate.ui.theme.AbacateTheme
 import org.junit.Rule
 import org.junit.Test
