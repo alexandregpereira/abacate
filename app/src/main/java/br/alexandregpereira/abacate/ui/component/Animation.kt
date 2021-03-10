@@ -11,6 +11,7 @@ import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -72,6 +73,16 @@ fun Modifier.pressedGesture(
             }
         } else {
             this
+        }
+    }
+
+    DisposableEffect(interactionSource) {
+        onDispose {
+            pressedInteraction.value?.let { oldValue ->
+                val interaction = PressInteraction.Cancel(oldValue)
+                interactionSource.tryEmit(interaction)
+                pressedInteraction.value = null
+            }
         }
     }
 
