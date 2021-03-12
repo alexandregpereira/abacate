@@ -56,7 +56,7 @@ fun ActionHeader(
             val onTap: (Offset) -> Unit = {
                 opened = opened.not()
             }
-            OvalImages(
+            CircleImages(
                 urls = urls,
                 opened = opened,
                 onTap = onTap,
@@ -109,7 +109,7 @@ fun TextVisibilityPreview() {
 }
 
 @Composable
-fun OvalImages(
+fun CircleImages(
     urls: List<String>,
     opened: Boolean,
     onTap: (Offset) -> Unit,
@@ -139,7 +139,7 @@ fun OvalImages(
     Box(boxModifier) {
         var startPadding = 16.dp
         urls.forEachIndexed { index, url ->
-            OvalImage(
+            CircleImage(
                 url,
                 pressed = pressed,
                 modifier = Modifier.padding(start = startPadding, end = 16.dp)
@@ -154,7 +154,7 @@ fun OvalImages(
 }
 
 @Composable
-fun OvalImage(
+fun CircleImage(
     url: String,
     modifier: Modifier = Modifier,
     pressed: Boolean = false
