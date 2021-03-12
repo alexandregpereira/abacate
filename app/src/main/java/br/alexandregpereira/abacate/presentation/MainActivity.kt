@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Surface
+import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -32,18 +32,19 @@ class MainActivity : AppCompatActivity() {
 @ExperimentalAnimationApi
 @Composable
 fun Window(viewModel: MainViewModel) = AbacateTheme {
-//    val posts: List<Post> by viewModel.posts.observeAsState(emptyList())
-//    LazyColumn {
-//        items(posts) { post ->
-//            AbacateCard(
-//                actionHeaderText = post.title,
-//                actionHeaderUrls = post.imageUrls,
-//                postText = post.message
-//            )
-//        }
-//    }
-    Surface {
-        BottomBar()
+    val posts: List<Post> by viewModel.posts.observeAsState(emptyList())
+    Scaffold(
+        bottomBar = { BottomBar() }
+    ) {
+        LazyColumn {
+            items(posts) { post ->
+                AbacateCard(
+                    actionHeaderText = post.title,
+                    actionHeaderUrls = post.imageUrls,
+                    postText = post.message
+                )
+            }
+        }
     }
 }
 
