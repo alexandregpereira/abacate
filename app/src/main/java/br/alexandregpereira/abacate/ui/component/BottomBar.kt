@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -17,12 +18,13 @@ import androidx.compose.ui.unit.dp
 import br.alexandregpereira.abacate.ui.theme.AbacateTheme
 
 @Composable
-fun BottomBar() {
+fun BottomBar(
+    itemCount: Int = 3
+) {
     val modifier = Modifier
         .height(56.dp)
         .fillMaxWidth()
 
-    val itemCount = 4
     var itemIndex by remember { mutableStateOf(0f) }
     val itemIndexState by animateFloatAsState(targetValue = itemIndex)
     val radiusList = (0..itemCount).map { index ->
@@ -55,24 +57,27 @@ private fun DrawBottomBar(
     itemCount: Int,
     itemIndex: Float,
     radiusList: List<Dp>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colors.primary,
 ) {
-    Canvas(modifier = modifier,
+    Canvas(
+        modifier = modifier,
         onDraw = {
             val bottomY = size.height
             val itemWidth = size.width / itemCount
+            val circleRadius = 24.dp.toPx()
             val marginTop = 8.dp.toPx()
-            val curveHeight = size.height * 0.78f + marginTop
+            val curveHeight = circleRadius * 2 + marginTop / 2
             val itemCenter = itemWidth / 2
             val curveCenter = itemCenter + (itemWidth * itemIndex)
 
             radiusList.forEachIndexed { index, radius ->
                 drawCircle(
-                    Color.Green,
+                    color,
                     radius = radius.toPx(),
                     center = Offset(
                         itemCenter + (itemWidth * index),
-                        (curveHeight / 2) - 2.dp.toPx()
+                        size.height / 2 - marginTop / 2
                     )
                 )
             }
@@ -81,46 +86,40 @@ private fun DrawBottomBar(
                     lineTo(0f, marginTop)
                     drawCircle(
                         marginTop = marginTop,
-                        width = size.width,
+                        radius = circleRadius,
                         curveHeight = curveHeight,
                         curveCenter = curveCenter,
-                        convertToPx = { it.toPx() }
                     )
                     lineTo(size.width, marginTop)
                     lineTo(size.width, bottomY)
                     lineTo(0f, bottomY)
                     close()
                 },
-                color = Color.Green,
+                color = color,
             )
         }
     )
 }
 
-private const val MAX_ITEMS = 5
 
 private fun Path.drawCircle(
     marginTop: Float,
-    width: Float,
+    radius: Float,
     curveHeight: Float,
-    curveCenter: Float,
-    convertToPx: (Dp) -> Float
+    curveCenter: Float
 ) {
-    val minSize = width / MAX_ITEMS
-    val minSizeCenter = minSize / 2
-
     val firstCurveStartPoint = Offset(
-        curveCenter - minSizeCenter,
+        curveCenter - radius * 2,
         marginTop
     )
 
     val point1 = Offset(
-        convertToPx(12.dp) + (curveCenter - minSizeCenter),
+        radius + (curveCenter - radius * 2),
         firstCurveStartPoint.y
     )
 
     val point2 = Offset(
-        -convertToPx(8.dp) + (curveCenter - minSizeCenter),
+        curveCenter - radius * 2,
         curveHeight
     )
 
