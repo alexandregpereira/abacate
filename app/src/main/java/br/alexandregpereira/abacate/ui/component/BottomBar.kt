@@ -38,12 +38,6 @@ fun BottomBar(
     val radiusList = (0..itemCount).map { index ->
         animateDpAsState(targetValue = if (index.toFloat() == itemIndex) 24.dp else 0.dp).value
     }
-    val itemMarginTopList = (0..itemCount).map { index ->
-        animateDpAsState(targetValue = if (index.toFloat() == itemIndex) 0.dp else 8.dp).value
-    }
-    val itemMarginBottomList = (0..itemCount).map { index ->
-        animateDpAsState(targetValue = if (index.toFloat() == itemIndex) 8.dp else 0.dp).value
-    }
 
     DrawBottomBar(
         itemCount = itemCount,
@@ -51,6 +45,28 @@ fun BottomBar(
         radiusList = radiusList,
         modifier
     )
+
+    BottomBarItems(
+        indexSelected = itemIndex.toInt(),
+        items = items,
+        onIndexSelected = { itemIndex = it.toFloat() },
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun BottomBarItems(
+    indexSelected: Int,
+    items: List<BottomBarItem>,
+    onIndexSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val itemMarginTopList = (0..items.size).map { index ->
+        animateDpAsState(targetValue = if (index == indexSelected) 0.dp else 8.dp).value
+    }
+    val itemMarginBottomList = (0..items.size).map { index ->
+        animateDpAsState(targetValue = if (index == indexSelected) 8.dp else 0.dp).value
+    }
 
     Row(modifier) {
         items.forEachIndexed { index, item ->
@@ -60,19 +76,24 @@ fun BottomBar(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = rememberRipple(bounded = false, radius = 40.dp)
                     ) {
-                        itemIndex = index.toFloat()
+                        onIndexSelected(index)
                     }
                     .weight(1f)
                     .fillMaxHeight()
                     .padding(top = itemMarginTopList[index], bottom = itemMarginBottomList[index]),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = item.icon,
-                    tint = MaterialTheme.colors.onPrimary,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = item.icon,
+                        tint = MaterialTheme.colors.onPrimary,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
         }
     }
