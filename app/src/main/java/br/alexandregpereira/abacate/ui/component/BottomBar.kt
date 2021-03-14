@@ -26,7 +26,7 @@ import br.alexandregpereira.abacate.ui.theme.AbacateTheme
 
 @Composable
 fun BottomBar(
-    items: List<BottomBarItem>
+    items: List<ImageVector>
 ) {
     val modifier = Modifier
         .height(56.dp)
@@ -57,7 +57,7 @@ fun BottomBar(
 @Composable
 private fun BottomBarItems(
     indexSelected: Int,
-    items: List<BottomBarItem>,
+    items: List<ImageVector>,
     onIndexSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -88,7 +88,7 @@ private fun BottomBarItems(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Icon(
-                        imageVector = item.icon,
+                        imageVector = item,
                         tint = MaterialTheme.colors.onPrimary,
                         contentDescription = null,
                         modifier = Modifier.size(24.dp)
@@ -201,11 +201,6 @@ private fun Path.drawCircle(
     )
 }
 
-class BottomBarItem(
-    val title: String,
-    val icon: ImageVector
-)
-
 @Preview
 @Composable
 fun BottomBarPreview() {
@@ -213,8 +208,8 @@ fun BottomBarPreview() {
         Surface {
             BottomBar(
                 listOf(
-                    BottomBarItem("Home", Icons.Outlined.Home),
-                    BottomBarItem("Home", Icons.Outlined.Home)
+                    Icons.Outlined.Home,
+                    Icons.Outlined.Home
                 )
             )
         }
