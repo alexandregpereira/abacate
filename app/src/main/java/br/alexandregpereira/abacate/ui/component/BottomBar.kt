@@ -4,14 +4,21 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -19,16 +26,23 @@ import br.alexandregpereira.abacate.ui.theme.AbacateTheme
 
 @Composable
 fun BottomBar(
-    itemCount: Int = 3
+    items: List<BottomBarItem>
 ) {
     val modifier = Modifier
         .height(56.dp)
         .fillMaxWidth()
 
+    val itemCount = items.size
     var itemIndex by remember { mutableStateOf(0f) }
     val itemIndexState by animateFloatAsState(targetValue = itemIndex)
     val radiusList = (0..itemCount).map { index ->
         animateDpAsState(targetValue = if (index.toFloat() == itemIndex) 24.dp else 0.dp).value
+    }
+    val itemMarginTopList = (0..itemCount).map { index ->
+        animateDpAsState(targetValue = if (index.toFloat() == itemIndex) 0.dp else 8.dp).value
+    }
+    val itemMarginBottomList = (0..itemCount).map { index ->
+        animateDpAsState(targetValue = if (index.toFloat() == itemIndex) 8.dp else 0.dp).value
     }
 
     DrawBottomBar(
@@ -39,15 +53,27 @@ fun BottomBar(
     )
 
     Row(modifier) {
-        (0 until itemCount).forEach { index ->
+        items.forEachIndexed { index, item ->
             Box(
                 modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clickable {
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = rememberRipple(bounded = false, radius = 40.dp)
+                    ) {
                         itemIndex = index.toFloat()
                     }
-            )
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(top = itemMarginTopList[index], bottom = itemMarginBottomList[index]),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = item.icon,
+                    tint = MaterialTheme.colors.onPrimary,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     }
 }
@@ -109,7 +135,7 @@ private fun Path.drawCircle(
     curveCenter: Float
 ) {
     val firstCurveStartPoint = Offset(
-        curveCenter - radius * 2,
+        curveCenter - radius * 1.5f,
         marginTop
     )
 
@@ -119,7 +145,7 @@ private fun Path.drawCircle(
     )
 
     val point2 = Offset(
-        curveCenter - radius * 2,
+        curveCenter - radius * 1.5f,
         curveHeight
     )
 
@@ -154,12 +180,22 @@ private fun Path.drawCircle(
     )
 }
 
+class BottomBarItem(
+    val title: String,
+    val icon: ImageVector
+)
+
 @Preview
 @Composable
 fun BottomBarPreview() {
     AbacateTheme {
         Surface {
-            BottomBar()
+            BottomBar(
+                listOf(
+                    BottomBarItem("Home", Icons.Outlined.Home),
+                    BottomBarItem("Home", Icons.Outlined.Home)
+                )
+            )
         }
     }
 }
